@@ -6,8 +6,11 @@ from django.core.files.base import ContentFile
 from django.db import models
 from PIL import Image, ImageDraw, ImageFont
 
-from core.constants import (MAX_LENGTH_ABOUT, MAX_LENGTH_PHONE,
-                            MAX_LENGTH_USER_NAME, MAX_LENGTH_USER_SURNAME)
+from core.constants import (AVATAR_FONT_SIZE, AVATAR_SIZE, COLOR_BLUE,
+                            COLOR_GREEN, COLOR_ORANGE, COLOR_PURPLE, COLOR_RED,
+                            COLOR_TURQUOISE, COLOR_YELLOW, MAX_LENGTH_ABOUT,
+                            MAX_LENGTH_PHONE, MAX_LENGTH_USER_NAME,
+                            MAX_LENGTH_USER_SURNAME)
 
 from .managers import UserManager
 
@@ -27,25 +30,31 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return f'{self.name} {self.surname}'
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'surname']
 
     def save(self, *args, **kwargs):
         if not self.avatar and self.name:
-            img = Image.new('RGB', (200, 200), color=self._get_random_color())
+            img = Image.new('RGB', (AVATAR_SIZE, AVATAR_SIZE), color=self._get_random_color())
             draw = ImageDraw.Draw(img)
-            
             try:
-                font = ImageFont.truetype("arial.ttf", 100)
+                font = ImageFont.truetype("arial.ttf", AVATAR_FONT_SIZE)
             except:
                 font = ImageFont.load_default()
-            
+
             letter = self.name[0].upper()
             bbox = draw.textbbox((0, 0), letter, font=font)
             text_width = bbox[2] - bbox[0]
             text_height = bbox[3] - bbox[1]
-            x = (200 - text_width) / 2
-            y = (200 - text_height) / 2 - 10
+            x = (AVATAR_SIZE - text_width) / 2
+            y = (AVATAR_SIZE - text_height) / 2 - 10
             
             draw.text((x, y), letter, font=font, fill='white')
             
@@ -58,22 +67,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def _get_random_color(self):
         colors = [
-            (52, 152, 219),  
-            (46, 204, 113),
-            (231, 76, 60),
-            (241, 196, 15),
-            (155, 89, 182),
-            (230, 126, 34),
-            (26, 188, 156),
+            COLOR_BLUE,
+            COLOR_GREEN,
+            COLOR_RED,
+            COLOR_YELLOW,
+            COLOR_PURPLE,
+            COLOR_ORANGE,
+            COLOR_TURQUOISE,
         ]
         return random.choice(colors)
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-
-    def __str__(self):
-        return f'{self.name} {self.surname}'
 
     @property
     def full_name(self):

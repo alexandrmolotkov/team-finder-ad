@@ -7,7 +7,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import (CreateView, DetailView, ListView, UpdateView,
                                   View)
 
-from core.constants import PAGINATE_BY, PROJECT_STATUS_OPEN, PROJECT_STATUS_CLOSED
+from core.constants import (PAGINATE_BY, PROJECT_STATUS_CLOSED,
+                            PROJECT_STATUS_OPEN)
 from core.mixins import SuccessProjectURLMixin
 
 from .forms import ProjectForm

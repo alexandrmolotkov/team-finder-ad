@@ -39,7 +39,6 @@ class LoginView(FormView):
 class UserDetailView(DetailView):
     model = User
     template_name = 'users/user-details.html'
-    context_object_name = 'user'
 
 
 class EditProfileView(SuccessUserURLMixin, LoginRequiredMixin, UpdateView):
