@@ -1,18 +1,17 @@
-from django.views.generic import CreateView, DetailView, UpdateView, ListView, FormView, View
-
 from django.contrib.auth import login, logout
-
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-from django.urls import reverse_lazy
-
-from django.shortcuts import redirect
-
 from django.db.models import Q
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import (CreateView, DetailView, FormView, ListView,
+                                  UpdateView, View)
 
+from core.constants import PAGINATE_BY
+from core.mixins import SuccessUserURLMixin
+
+from .forms import (ChangePasswordForm, UserEditForm, UserLoginForm,
+                    UserRegistrationForm)
 from .models import User
-
-from .forms import UserRegistrationForm, UserLoginForm, UserEditForm, ChangePasswordForm
 
 
 class RegisterView(CreateView):
@@ -43,16 +42,13 @@ class UserDetailView(DetailView):
     context_object_name = 'user'
 
 
-class EditProfileView(LoginRequiredMixin, UpdateView):
+class EditProfileView(SuccessUserURLMixin, LoginRequiredMixin, UpdateView):
     model = User
     form_class = UserEditForm
     template_name = 'users/edit_profile.html'
 
     def get_object(self):
         return self.request.user
-
-    def get_success_url(self):
-        return reverse_lazy('users:user_detail', kwargs={'pk': self.request.user.pk})
 
 
 class LogoutView(View):
@@ -65,7 +61,7 @@ class UsersListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'users/participants.html'
     context_object_name = 'participants'
-    paginate_by = 12
+    paginate_by = PAGINATE_BY
     ordering = ['-id']
 
     def get_queryset(self):
@@ -99,10 +95,9 @@ class UsersListView(LoginRequiredMixin, ListView):
         return context
 
 
-class ChangePasswordView(LoginRequiredMixin, FormView):
+class ChangePasswordView(SuccessUserURLMixin, LoginRequiredMixin, FormView):
     template_name = 'users/change_password.html'
     form_class = ChangePasswordForm
-    success_url = reverse_lazy('user_detail')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -115,6 +110,3 @@ class ChangePasswordView(LoginRequiredMixin, FormView):
         user.set_password(new_password)
         user.save()
         return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('users:user_detail', kwargs={'pk': self.request.user.pk})

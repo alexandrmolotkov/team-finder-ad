@@ -1,10 +1,11 @@
-from django import forms
+import re
 
+from django import forms
 from django.contrib.auth import authenticate
 
-from .models import User
+from core.mixins import GithubURLMixin
 
-import re
+from .models import User
 
 
 class UserRegistrationForm(forms.ModelForm):
@@ -42,7 +43,7 @@ class UserLoginForm(forms.Form):
         return self.user
 
 
-class UserEditForm(forms.ModelForm):
+class UserEditForm(GithubURLMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = ['name', 'surname', 'avatar', 'about', 'phone', 'github_url']
@@ -61,12 +62,6 @@ class UserEditForm(forms.ModelForm):
             if User.objects.filter(phone=phone).exclude(pk=self.instance.pk).exists():
                 raise forms.ValidationError('Этот номер телефона уже используется')
         return phone
-
-    def clean_github_url(self):
-        url = self.cleaned_data.get('github_url')
-        if url and 'github.com' not in url:
-            raise forms.ValidationError('Ссылка должна вести на GitHub')
-        return url
 
 
 class ChangePasswordForm(forms.Form):
